@@ -445,15 +445,17 @@ tape('writes are batched', function (t) {
   var ws = feed.createWriteStream()
 
   ws.write('ab')
-  ws.write('cd')
-  ws.write('ef')
-  ws.end(function () {
-    t.deepEquals(trackingRam.log.data, [
-      { write: [0, Buffer.from('ab')] },
-      { write: [2, Buffer.from('cdef')] }
-    ])
-    feed.close(function () {
-      t.end()
+  setImmediate(function () {
+    ws.write('cd')
+    ws.write('ef')
+    ws.end(function () {
+      t.deepEquals(trackingRam.log.data, [
+        { write: [0, Buffer.from('ab')] },
+        { write: [2, Buffer.from('cdef')] }
+      ])
+      feed.close(function () {
+        t.end()
+      })
     })
   })
 })
